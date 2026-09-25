@@ -28,4 +28,27 @@ public class ListaCircular
             last = nuevo;           // Actualizamos el puntero last
         }
     }
+
+    // Alias en estilo de nombre solicitado: Agregar
+    public void Agregar(int dato)
+    {
+        Insertar(dato);
+    }
+
+    // Busca un nodo por su valor y devuelve el nodo encontrado o null si no existe
+    public Nodo Buscar(int dato)
+    {
+        if (head == null)
+            return null;
+
+        Nodo actual = head;
+        do
+        {
+            if (actual.Dato == dato)
+                return actual;
+            actual = actual.Siguiente;
+        } while (actual != head);
+
+        return null;
+    }
 }
