@@ -2,132 +2,229 @@
 
 public class ListaCircular
 {
-    private Nodo head; 
-    private Nodo last; 
+    private Nodo head;
+    private Nodo last;
+    private Nodo actual;
 
     public ListaCircular()
     {
         head = null;
         last = null;
+        actual = null;
     }
 
-    public void Insertar(int dato)
+    public void Agregar(int dato)
     {
         Nodo nuevo = new Nodo(dato);
 
-        if (head == null) 
+        if (head == null)
         {
             head = nuevo;
             last = nuevo;
-            nuevo.Siguiente = head; 
+
+            // El único nodo apunta a sí mismo
+            nuevo.Siguiente = head;
+
+            // El primer nodo también es el actual
+            actual = head;
         }
         else
         {
-            last.Siguiente = nuevo; // El último apunta al nuevo
-            nuevo.Siguiente = head; // El nuevo apunta al primero (circular)
-            last = nuevo;           // Actualizamos el puntero last
+            last.Siguiente = nuevo;
+            nuevo.Siguiente = head;
+            last = nuevo;
         }
+
+        Console.WriteLine($"Turno {dato} agregado correctamente.");
     }
 
-    // Alias en estilo de nombre solicitado: Agregar
-    public void Agregar(int dato)
-    {
-        Insertar(dato);
-    }
-
-    // Busca un nodo por su valor y devuelve el nodo encontrado o null si no existe
     public Nodo Buscar(int dato)
     {
         if (head == null)
             return null;
 
-        Nodo actual = head;
+        Nodo recorrido = head;
+
         do
         {
-            if (actual.Dato == dato)
-                return actual;
-            actual = actual.Siguiente;
-        } while (actual != head);
+            if (recorrido.Dato == dato)
+                return recorrido;
+
+            recorrido = recorrido.Siguiente;
+
+        } while (recorrido != head);
 
         return null;
     }
-        // ---------------------------------------------------------------
-    // Eliminar(dato): elimina la PRIMERA aparición de 'dato'.
-    // Devuelve true si lo eliminó y false si no existe.
-    // Condición de parada: recorre como máximo UNA vuelta completa
-    // (se detiene al regresar a head), así nunca entra en bucle infinito
-    // aunque el dato no esté en la lista.
-    // Mantiene la circularidad: al terminar, last.Siguiente == head.
-    // ---------------------------------------------------------------
-    public bool Eliminar(int dato)
+
+    public void Eliminar(int dato)
     {
-        // Caso 1: lista vacía -> no hay nada que eliminar
-        if (head == null)
-            return false;
-
-        // Caso 2: el dato está en head
-        if (head.Dato == dato)
-        {
-            if (head == last)
-            {
-                // Caso 2a: era el único nodo -> la lista queda vacía
-                head = null;
-                last = null;
-            }
-            else
-            {
-                // Caso 2b: avanzar head y reconectar el último con el nuevo head
-                head = head.Siguiente;
-                last.Siguiente = head;
-            }
-            return true;
-        }
-
-        // Caso 3: buscar desde el segundo nodo, recordando el anterior
-        Nodo anterior = head;
-        Nodo actual = head.Siguiente;
-
-        while (actual != head) // parada: una vuelta completa
-        {
-            if (actual.Dato == dato)
-            {
-                anterior.Siguiente = actual.Siguiente; // saltar el nodo eliminado
-
-                // Caso 3b: si era el último, 'anterior' pasa a ser el nuevo last
-                if (actual == last)
-                    last = anterior;
-
-                return true;
-            }
-            anterior = actual;
-            actual = actual.Siguiente;
-        }
-
-        // Caso 4: se dio una vuelta completa y no se encontró el dato
-        return false;
-    }
-
-    // ---------------------------------------------------------------
-    // Imprimir(): muestra los datos desde head hasta regresar a head.
-    // Usa do...while porque el recorrido empieza en head: con un
-    // while (actual != head) normal, el ciclo no se ejecutaría nunca.
-    // ---------------------------------------------------------------
-    public void Imprimir()
-    {
-        // Lista vacía: se valida ANTES de recorrer
         if (head == null)
         {
             Console.WriteLine("La lista está vacía.");
             return;
         }
 
-        Nodo actual = head;
+        Nodo recorrido = head;
+        Nodo anterior = last;
+
         do
         {
-            Console.Write($"{actual.Dato} -> ");
-            actual = actual.Siguiente;
-        } while (actual != head); // parada: se regresó al inicio
+            if (recorrido.Dato == dato)
+            {
+                // Caso: solo existe un nodo
+                if (head == last)
+                {
+                    head = null;
+                    last = null;
+                    actual = null;
+                }
 
-        Console.WriteLine($"(vuelve a {head.Dato})");
+                // Caso: eliminar el primer nodo
+                else if (recorrido == head)
+                {
+                    head = head.Siguiente;
+                    last.Siguiente = head;
+
+                    if (actual == recorrido)
+                        actual = head;
+                }
+
+                // Caso: eliminar cualquier otro nodo
+                else
+                {
+                    anterior.Siguiente = recorrido.Siguiente;
+
+                    if (recorrido == last)
+                        last = anterior;
+
+                    if (actual == recorrido)
+                        actual = recorrido.Siguiente;
+                }
+
+                Console.WriteLine($"Turno {dato} eliminado correctamente.");
+                return;
+            }
+
+            anterior = recorrido;
+            recorrido = recorrido.Siguiente;
+
+        } while (recorrido != head);
+
+        Console.WriteLine($"El turno {dato} no existe.");
+    }
+
+    public void Imprimir()
+    {
+        if (head == null)
+        {
+            Console.WriteLine("La lista está vacía.");
+            return;
+        }
+
+        Nodo recorrido = head;
+
+        Console.WriteLine("\n--- RECORRIDO DE LA LISTA CIRCULAR ---");
+
+        do
+        {
+            Console.Write(recorrido.Dato);
+
+            recorrido = recorrido.Siguiente;
+
+            if (recorrido != head)
+                Console.Write(" -> ");
+
+        } while (recorrido != head);
+
+        Console.WriteLine(" -> vuelve al PRIMER NODO (" + head.Dato + ")");
+
+        Console.WriteLine($"Primer nodo (HEAD): {head.Dato}");
+        Console.WriteLine($"Último nodo (LAST): {last.Dato}");
+    }
+
+    public void MostrarActual()
+    {
+        if (actual == null)
+        {
+            Console.WriteLine("No existen turnos.");
+            return;
+        }
+
+        Console.WriteLine($"Turno actual: {actual.Dato}");
+
+        if (actual == head)
+            Console.WriteLine("Este es el PRIMER NODO (HEAD).");
+    }
+
+    public void SiguienteTurno()
+    {
+        if (actual == null)
+        {
+            Console.WriteLine("No hay turnos registrados.");
+            return;
+        }
+
+        Nodo anterior = actual;
+        actual = actual.Siguiente;
+
+        Console.WriteLine($"\nAvanzando: {anterior.Dato} -> {actual.Dato}");
+
+        if (actual == head)
+        {
+            Console.WriteLine("======================================");
+            Console.WriteLine(" COMPLETASTE UNA VUELTA A LA LISTA");
+            Console.WriteLine(" Regresaste al primer nodo (HEAD).");
+            Console.WriteLine("======================================");
+        }
+        else
+        {
+            Console.WriteLine($"Turno actual: {actual.Dato}");
+        }
+    }
+
+  
+    public void RetrocederTurno()
+    {
+        if (actual == null)
+        {
+            Console.WriteLine("No hay turnos registrados.");
+            return;
+        }
+
+        
+        Nodo anterior = head;
+
+        while (anterior.Siguiente != actual)
+        {
+            anterior = anterior.Siguiente;
+        }
+
+        Nodo turnoAnterior = actual;
+
+        actual = anterior;
+
+        Console.WriteLine($"\nRetrocediendo: {turnoAnterior.Dato} <- {actual.Dato}");
+
+        if (actual == last)
+        {
+            Console.WriteLine("======================================");
+            Console.WriteLine(" LLEGASTE AL ÚLTIMO NODO (LAST)");
+            Console.WriteLine(" La lista continúa de forma circular.");
+            Console.WriteLine("======================================");
+        }
+        else if (actual == head)
+        {
+            Console.WriteLine("Regresaste al primer nodo (HEAD).");
+        }
+        else
+        {
+            Console.WriteLine($"Turno actual: {actual.Dato}");
+        }
+    }
+
+    public bool EstaVacia()
+    {
+        return head == null;
     }
 }
